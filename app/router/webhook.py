@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException, BackgroundTasks
-from fastapi.responses import JSONResponse
 import logging
 from app.schema.webhook import Update, WebhookResponse
 from app.service.webhook import TelegramService

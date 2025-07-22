@@ -20,7 +20,7 @@
 
 ## 🛠️ Config
 
-1. config.yml
+1. Config.yml
     ```sh
     tunnel: <Tunnel ID>
     credentials-file: /etc/cloudflared/<Tunnel ID>.json
@@ -55,6 +55,8 @@
     ```sh
     TELEGRAM_BOT_TOKEN=bot token
     BASE_WEBHOOK_URL=https://domain
+    SPREADSHEET_ID=id spreadsheet
+    GOOGLE_CREDENTIALS_PATH=credentials.json
     ```
 
 ## 🚀 Run Bot

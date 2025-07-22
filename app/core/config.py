@@ -6,5 +6,7 @@ load_dotenv()
 class Settings:
     telegram_bot_token: str = os.getenv("TELEGRAM_BOT_TOKEN")
     base_webhook_url: str = os.getenv("BASE_WEBHOOK_URL")
+    spreadsheet_id: str = os.getenv("SPREADSHEET_ID")
+    credentials_path: str = os.getenv("GOOGLE_CREDENTIALS_PATH", "credentials.json")
 
 settings = Settings()

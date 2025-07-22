@@ -8,6 +8,8 @@ __pycache__/
 cloudflared/*.json
 cloudflared/config.yml
 
+credentials.json
+
 .env
 .venv
 env/
