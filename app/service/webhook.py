@@ -37,13 +37,17 @@ class TelegramService:
             logger.error(f"Error getting webhook info: {e}")
             return {}
 
-    async def send_message(self, chat_id: int, text: str, parse_mode: str = "HTML") -> bool:
+    async def send_message(self, chat_id: int, text: str, parse_mode: str = "Markdown", reply_markup=None) -> bool:
         url = f"{self.base_url}/sendMessage"
         data = {
             "chat_id": chat_id,
             "text": text,
             "parse_mode": parse_mode
         }
+
+        if reply_markup:
+            data["reply_markup"] = reply_markup
+
         try:
             result = await telegram_post(url, data)
             return result.get("ok", False)
@@ -71,11 +75,51 @@ class TelegramService:
 
         logger.info(f"Message from {user_name} ({chat_id}): {text}")
 
-        response_text = handle_command(text, user_name)
-        await self.send_message(chat_id, response_text)
+        response_text, keyboard_markup = handle_command(text, user_name, chat_id)
+        await self.send_message(chat_id, response_text, reply_markup=keyboard_markup)
 
     async def _handle_edited_message(self, message):
         logger.info(f"Edited message: {message}")
 
     async def _handle_callback_query(self, callback_query):
         logger.info(f"Callback query: {callback_query}")
+
+        chat_id = callback_query.message.chat.id if callback_query.message else None
+        user_name = callback_query.from_.first_name or "Unknown"
+        callback_data = callback_query.data or ""
+
+        if not chat_id:
+            logger.error("Missing chat_id in callback query")
+            return
+
+        response_text, keyboard_markup = handle_command(callback_data, user_name, chat_id)
+
+        await telegram_post(
+            f"{self.base_url}/answerCallbackQuery",
+            {"callback_query_id": callback_query.id}
+        )
+
+        message_id = callback_query.message.message_id if callback_query.message else None
+        if message_id:
+            edit_data = {
+                "chat_id": chat_id,
+                "message_id": message_id,
+                "text": response_text,
+                "parse_mode": "Markdown"
+            }
+
+            if keyboard_markup:
+                edit_data["reply_markup"] = keyboard_markup
+
+            logger.info(f"Attempting to edit message with data: {edit_data}")
+
+            result = await telegram_post(
+                f"{self.base_url}/editMessageText",
+                edit_data
+            )
+
+            if not result.get("ok"):
+                logger.error(f"Edit message failed: {result}")
+                await self.send_message(chat_id, response_text, reply_markup=keyboard_markup)
+        else:
+            await self.send_message(chat_id, response_text, reply_markup=keyboard_markup)

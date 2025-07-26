@@ -12,7 +12,6 @@ telegram_service = TelegramService()
 @router.post("/webhook", response_model=WebhookResponse)
 async def telegram_webhook(update: Update, background_tasks: BackgroundTasks):
     try:
-        # Process update in background to avoid timeout
         background_tasks.add_task(telegram_service.process_update, update)
 
         return WebhookResponse(
