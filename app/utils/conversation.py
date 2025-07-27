@@ -9,6 +9,7 @@ class ConversationState(Enum):
     ADD_MANUAL_JENIS = "add_manual_jenis"
     ADD_MANUAL_SUMBER = "add_manual_sumber"
     ADD_MANUAL_KATEGORI = "add_manual_kategori"
+    ADD_MANUAL_KATEGORI_LAINNYA = "add_manual_kategori_lainnya"
     ADD_MANUAL_JUMLAH = "add_manual_jumlah"
     ADD_MANUAL_DESKRIPSI = "add_manual_deskripsi"
     ADD_MANUAL_CONFIRM = "add_manual_confirm"

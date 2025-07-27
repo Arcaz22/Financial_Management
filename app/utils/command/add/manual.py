@@ -112,7 +112,28 @@ def handle_manual_add(session, text, user_name):
                 ]
             }
             return "Pilih sumber dana transaksi:", keyboard
+        if text == "other_category":
+            session.set_state(ConversationState.ADD_MANUAL_KATEGORI_LAINNYA)
+            keyboard = {"inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]}
+            return "Silahkan ketik nama kategori lainnya:", keyboard
         session.transaction_data["kategori"] = CATEGORY_MAP.get(text, text)
+        session.set_state(ConversationState.ADD_MANUAL_JUMLAH)
+        keyboard = {"inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]}
+        return "Masukkan jumlah transaksi (dalam angka, contoh: 50000):", keyboard
+
+    # Kategori Lainnya (input manual)
+    if session.state == ConversationState.ADD_MANUAL_KATEGORI_LAINNYA:
+        if text in ["back", "« Kembali"]:
+            session.go_back()
+            if session.transaction_data["jenis"] == "Pemasukan":
+                keyboard = build_keyboard(INCOME_CATEGORIES)
+            else:
+                keyboard = build_keyboard(EXPENSE_CATEGORIES)
+            return "Pilih kategori transaksi:", keyboard
+        if not text.strip():
+            keyboard = {"inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]}
+            return "Nama kategori tidak boleh kosong. Silahkan ketik nama kategori lainnya:", keyboard
+        session.transaction_data["kategori"] = text.strip()
         session.set_state(ConversationState.ADD_MANUAL_JUMLAH)
         keyboard = {"inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]}
         return "Masukkan jumlah transaksi (dalam angka, contoh: 50000):", keyboard

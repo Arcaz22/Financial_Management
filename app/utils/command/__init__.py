@@ -2,7 +2,7 @@ from app.utils.command.menu import handle_menu
 from app.utils.command.help import handle_help
 from app.utils.command.summary import handle_summary
 from app.utils.command.add.manual import handle_manual_add
-from app.utils.command.add.qr import handle_qr_add
+from app.utils.command.add.scan import handle_qr_add
 from app.utils.conversation import ConversationState, get_user_session
 from app.service.sheet import SheetsService
 
@@ -43,6 +43,7 @@ def handle_command(text, user_name, chat_id):
         ConversationState.ADD_MANUAL_JENIS,
         ConversationState.ADD_MANUAL_SUMBER,
         ConversationState.ADD_MANUAL_KATEGORI,
+        ConversationState.ADD_MANUAL_KATEGORI_LAINNYA,
         ConversationState.ADD_MANUAL_JUMLAH,
         ConversationState.ADD_MANUAL_DESKRIPSI,
         ConversationState.ADD_MANUAL_CONFIRM

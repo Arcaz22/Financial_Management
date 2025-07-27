@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.router.webhook import router as webhook
 from app.router.sheets import router as sheets
+from app.router.ocr import router as ocr
 
 logging.basicConfig(
     level=logging.INFO,
@@ -27,6 +28,7 @@ app.add_middleware(
 
 app.include_router(webhook, tags=["telegram"])
 app.include_router(sheets, tags=["sheets"])
+app.include_router(ocr, tags=["ocr"])
 
 @app.get("/")
 async def root():

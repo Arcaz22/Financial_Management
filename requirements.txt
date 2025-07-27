@@ -16,12 +16,16 @@ httplib2==0.22.0
 httpx==0.28.1
 idna==3.10
 oauthlib==3.3.1
+packaging==25.0
+pillow==11.3.0
 pyasn1==0.6.1
 pyasn1_modules==0.4.2
 pydantic==2.11.7
 pydantic_core==2.33.2
 pyparsing==3.2.3
+pytesseract==0.3.13
 python-dotenv==1.1.1
+python-multipart==0.0.20
 requests==2.32.4
 requests-oauthlib==2.0.0
 rsa==4.9.1
