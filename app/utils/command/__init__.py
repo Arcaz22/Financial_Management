@@ -2,13 +2,13 @@ from app.utils.command.menu import handle_menu
 from app.utils.command.help import handle_help
 from app.utils.command.summary import handle_summary
 from app.utils.command.add.manual import handle_manual_add
-from app.utils.command.add.scan import handle_qr_add
+from app.utils.command.add.scan import handle_scan_add
 from app.utils.conversation import ConversationState, get_user_session
 from app.service.sheet import SheetsService
 
 sheets_service = SheetsService()
 
-def handle_command(text, user_name, chat_id):
+async def handle_command(text, user_name, chat_id, photo=None):
     session = get_user_session(chat_id)
 
     if text.startswith("/start"):
@@ -31,7 +31,7 @@ def handle_command(text, user_name, chat_id):
         keyboard = {
             "inline_keyboard": [
                 [{"text": "✏️ Input Manual", "callback_data": "add_manual"}],
-                [{"text": "📷 Scan Nota", "callback_data": "add_qr"}]
+                [{"text": "📷 Scan Nota", "callback_data": "add_scan"}]
             ]
         }
         return "Pilih metode untuk menambahkan transaksi:", keyboard
@@ -50,7 +50,12 @@ def handle_command(text, user_name, chat_id):
     ]:
         return handle_manual_add(session, text, user_name)
 
-    if session.state == ConversationState.ADD_AI_PROCESSING:
-        return handle_qr_add(session, text)
+    if session.state in [
+        ConversationState.ADD_AI_PROCESSING,
+        ConversationState.ADD_AI_PROCESSING_WAIT,
+        ConversationState.ADD_AI_CONFIRM,
+        ConversationState.ADD_AI_EDIT
+    ]:
+        return await handle_scan_add(session, text, photo)
 
     return "🤷‍♀️ Maaf, perintah yang kamu masukkan tidak aku kenali. Coba ketik /menu untuk melihat daftar perintah yang bisa kamu gunakan ya! 😉", None

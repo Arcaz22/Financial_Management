@@ -18,10 +18,10 @@ def handle_manual_add(session, text, user_name):
             session.set_current_datetime()
             keyboard = {"inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]}
             return "Silahkan masukkan nama transaksi:", keyboard
-        elif text == "add_qr":
+        elif text == "add_scan":
             session.set_state(ConversationState.ADD_AI_PROCESSING)
             keyboard = {"inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]}
-            return "Silahkan jelaskan transaksi dengan bahasa natural'", keyboard
+            return "📷 Silahkan kirim foto nota/struk belanja untuk diproses. Pastikan gambar jelas dan seluruh nota terlihat.", keyboard
 
     # Nama transaksi
     if session.state == ConversationState.ADD_MANUAL_NAME:
@@ -30,7 +30,7 @@ def handle_manual_add(session, text, user_name):
             keyboard = {
                 "inline_keyboard": [
                     [{"text": "✏️ Input Manual", "callback_data": "add_manual"}],
-                    [{"text": "📷 Scan Nota", "callback_data": "add_qr"}]
+                    [{"text": "📷 Scan Nota", "callback_data": "add_scan"}]
                 ]
             }
             return "Silahkan pilih metode input transaksi:", keyboard

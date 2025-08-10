@@ -3,6 +3,8 @@ from app.utils.command import handle_command
 from app.utils.api import telegram_post, telegram_get
 from app.core.config import settings
 from app.schema.webhook import Update
+import aiohttp
+from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -50,14 +52,33 @@ class TelegramService:
 
         try:
             result = await telegram_post(url, data)
+            if not result.get("ok", False):
+                # Kirim pesan error manual jika gagal
+                await telegram_post(url, {
+                    "chat_id": chat_id,
+                    "text": "❌ Gagal mengirim hasil scan ke Telegram. Silakan coba lagi atau gunakan input manual.",
+                    "parse_mode": "Markdown"
+                })
             return result.get("ok", False)
         except Exception as e:
             logger.error(f"Error sending message: {e}")
+            await telegram_post(url, {
+                "chat_id": chat_id,
+                "text": "❌ Terjadi kesalahan saat mengirim pesan. Silakan coba lagi atau gunakan input manual.",
+                "parse_mode": "Markdown"
+            })
             return False
 
     async def process_update(self, update: Update):
         try:
             logger.info(f"Processing update: {update.update_id}")
+
+            # Log seluruh struktur update untuk debugging
+            try:
+                import json
+                logger.info(f"Update structure: {json.dumps(update.dict())}")
+            except Exception as e:
+                logger.warning(f"Could not log update structure: {e}")
 
             if update.message:
                 await self._handle_message(update.message)
@@ -72,10 +93,56 @@ class TelegramService:
         chat_id = message.chat.id
         user_name = message.from_.first_name if message.from_ else "Unknown"
         text = message.text or ""
+        photo = None
+
+        # Log struktur message untuk debugging
+        try:
+            import json
+            logger.info(f"Message structure: {json.dumps(message.dict())}")
+        except Exception as e:
+            logger.warning(f"Could not log message structure: {e}")
+
+        # Periksa apakah ada foto dengan metode yang lebih aman
+        has_photo = False
+        file_id = None
+
+        # Coba berbagai cara untuk mendapatkan foto
+        if hasattr(message, 'photo') and message.photo:
+            has_photo = True
+            file_id = message.photo[-1].file_id
+        elif hasattr(message, 'document') and message.document:
+            if getattr(message.document, 'mime_type', None) and message.document.mime_type.startswith('image/'):
+                has_photo = True
+                file_id = message.document.file_id
+
+        if has_photo and file_id:
+            logger.info(f"Photo received from {user_name} ({chat_id}), file_id: {file_id}")
+
+            # Dapatkan file path
+            get_file_url = f"{self.base_url}/getFile"
+            file_info = await telegram_post(get_file_url, {"file_id": file_id})
+
+            if file_info.get("ok") and "result" in file_info:
+                file_path = file_info["result"].get("file_path")
+                if file_path:
+                    # Download file
+                    download_url = f"https://api.telegram.org/file/bot{self.bot_token}/{file_path}"
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(download_url) as response:
+                            if response.status == 200:
+                                photo = await response.read()
+                                logger.info(f"Successfully downloaded photo ({len(photo)} bytes)")
+                            else:
+                                logger.error(f"Failed to download photo: {response.status}")
+                else:
+                    logger.error("No file_path in getFile response")
+            else:
+                logger.error(f"Failed to get file info: {file_info}")
 
         logger.info(f"Message from {user_name} ({chat_id}): {text}")
 
-        response_text, keyboard_markup = handle_command(text, user_name, chat_id)
+        # Teruskan foto ke handle_command
+        response_text, keyboard_markup = await handle_command(text, user_name, chat_id, photo)
         await self.send_message(chat_id, response_text, reply_markup=keyboard_markup)
 
     async def _handle_edited_message(self, message):
@@ -92,7 +159,8 @@ class TelegramService:
             logger.error("Missing chat_id in callback query")
             return
 
-        response_text, keyboard_markup = handle_command(callback_data, user_name, chat_id)
+        # response_text, keyboard_markup = handle_command(callback_data, user_name, chat_id)
+        response_text, keyboard_markup = await handle_command(callback_data, user_name, chat_id)
 
         await telegram_post(
             f"{self.base_url}/answerCallbackQuery",

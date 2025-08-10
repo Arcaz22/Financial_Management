@@ -14,6 +14,9 @@ class ConversationState(Enum):
     ADD_MANUAL_DESKRIPSI = "add_manual_deskripsi"
     ADD_MANUAL_CONFIRM = "add_manual_confirm"
     ADD_AI_PROCESSING = "add_ai_processing"
+    ADD_AI_PROCESSING_WAIT = "add_ai_processing_wait"
+    ADD_AI_CONFIRM = "add_ai_confirm"
+    ADD_AI_EDIT = "add_ai_edit"
 
 class UserSession:
     def __init__(self):
@@ -28,6 +31,7 @@ class UserSession:
             "deskripsi": ""
         }
         self.prev_states = []
+        self.temp_data = None
 
     def set_state(self, new_state: ConversationState):
         self.prev_states.append(self.state)

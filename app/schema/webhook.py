@@ -1,5 +1,12 @@
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any, List
+from typing import Optional, Any, List
+
+class PhotoSize(BaseModel):
+    file_id: str
+    file_unique_id: str
+    width: int
+    height: int
+    file_size: Optional[int] = None
 
 class User(BaseModel):
     id: int
@@ -18,11 +25,12 @@ class Chat(BaseModel):
 
 class Message(BaseModel):
     message_id: int
-    from_: Optional[User] = None
+    from_: Optional[User] = Field(None, alias="from")
     chat: Chat
     date: int
     text: Optional[str] = None
-    reply_markup: Optional[Dict[str, Any]] = None
+    photo: Optional[List[PhotoSize]] = None
+    document: Optional[Any] = None
 
     class Config:
         populate_by_name = True

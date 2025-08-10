@@ -40,3 +40,21 @@ def build_keyboard(options, row=2):
         ])
     keyboard.append([{"text": "« Kembali", "callback_data": "back"}])
     return {"inline_keyboard": keyboard}
+
+def get_back_keyboard():
+    """Keyboard dengan tombol kembali saja"""
+    return {"inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]}
+
+def get_confirmation_keyboard():
+    """Keyboard konfirmasi hasil OCR"""
+    return {
+        "inline_keyboard": [
+            [
+                {"text": "✅ Ya, Simpan", "callback_data": "ya"},
+                {"text": "✏️ Edit", "callback_data": "edit"}
+            ],
+            [
+                {"text": "❌ Batal", "callback_data": "batal"}
+            ]
+        ]
+    }
