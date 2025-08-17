@@ -1,3 +1,4 @@
+from datetime import datetime
 from app.utils.conversation import ConversationState
 from app.utils.constant import (
     INCOME_CATEGORIES,
@@ -35,6 +36,8 @@ def handle_manual_add(session, text, user_name):
             }
             return "Silahkan pilih metode input transaksi:", keyboard
         session.transaction_data["nama"] = text
+        # Otomatis ambil tanggal hari ini, format ISO
+        session.transaction_data["tanggal"] = datetime.now().date().isoformat()
         session.set_state(ConversationState.ADD_MANUAL_JENIS)
         keyboard = {
             "inline_keyboard": [
@@ -151,8 +154,7 @@ def handle_manual_add(session, text, user_name):
         if not clean_amount.isdigit() or int(clean_amount) <= 0:
             return "Jumlah harus berupa angka positif. Silahkan masukkan kembali:", None
         amount = int(clean_amount)
-        formatted_amount = f"{amount:,}".replace(",", ".")
-        session.transaction_data["jumlah"] = formatted_amount
+        session.transaction_data["jumlah"] = amount
         session.set_state(ConversationState.ADD_MANUAL_DESKRIPSI)
         keyboard = {"inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]}
         return "Masukkan deskripsi transaksi (opsional, ketik '-' jika tidak ada):", keyboard
@@ -171,7 +173,7 @@ def handle_manual_add(session, text, user_name):
         confirmation += f"📊 Jenis: {session.transaction_data['jenis']}\n"
         confirmation += f"💰 Sumber: {session.transaction_data['sumber']}\n"
         confirmation += f"🏷️ Kategori: {session.transaction_data['kategori']}\n"
-        confirmation += f"💵 Jumlah: Rp {session.transaction_data['jumlah']}\n"
+        confirmation += f"💵 Jumlah: Rp {session.transaction_data['jumlah']:,}\n"
         if session.transaction_data['deskripsi']:
             confirmation += f"📝 Deskripsi: {session.transaction_data['deskripsi']}\n"
         confirmation += "\nApakah data di atas sudah benar?"

@@ -59,26 +59,31 @@ class SheetsService:
 
     def add_transaction(self, transaction_data):
         date_str = transaction_data["tanggal"]
+        # Hilangkan tanda ' di depan tanggal jika ada
+        if isinstance(date_str, str) and date_str.startswith("'"):
+            date_str = date_str.lstrip("'")
         try:
-            date_obj = datetime.strptime(date_str, "%d %B %Y %H:%M")
+            # Ubah format tanggal ke DD/MM/YYYY agar Google Sheets mengenali sebagai tanggal
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+            date_str = date_obj.strftime("%d/%m/%Y")
             year = date_obj.year
-        except ValueError:
+        except Exception:
             year = datetime.now().year
 
         sheet_name = self.ensure_year_sheet_exists(year)
         worksheet = self.spreadsheet.worksheet(sheet_name)
 
         row_data = [
-            transaction_data["tanggal"],
+            date_str,  # Tanggal sudah dibersihkan dari tanda '
             transaction_data["nama"],
             transaction_data["jenis"],
             transaction_data["sumber"],
             transaction_data["kategori"],
-            transaction_data["jumlah"],
+            transaction_data["jumlah"],  # integer
             transaction_data["deskripsi"]
         ]
 
-        worksheet.append_row(row_data)
+        worksheet.append_row(row_data, value_input_option="USER_ENTERED")
         logger.info(f"Added new transaction for {transaction_data['nama']}")
 
         return True

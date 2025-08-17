@@ -1,3 +1,4 @@
+from datetime import datetime
 from app.service.gemini import GeminiReceiptProcessor
 from app.utils.conversation import ConversationState
 from app.service.ocr import OCRService
@@ -104,9 +105,18 @@ async def handle_scan_add(session, text=None, photo=None):
                     amount_str = re.sub(r'[^\d]', '', raw_jumlah)
                     amount = int(amount_str) if amount_str else 0
                     formatted_amount = f"{amount:,}".replace(",", ".")
-                    session.transaction_data["jumlah"] = f"'{formatted_amount}" if amount > 0 else "0"
+                    session.transaction_data["jumlah"] = formatted_amount if amount > 0 else "0"
                 except (ValueError, TypeError):
                     logger.warning(f"Failed to format amount: {session.transaction_data['jumlah']}")
+
+            # Format tanggal ke DD/MM/YYYY
+            if "tanggal" in session.transaction_data:
+                try:
+                    raw_tanggal = str(session.transaction_data["tanggal"]).lstrip("'")
+                    date_obj = datetime.strptime(raw_tanggal, "%Y-%m-%d")
+                    session.transaction_data["tanggal"] = date_obj.strftime("%d/%m/%Y")
+                except Exception:
+                    pass
 
             try:
                 from app.service.sheet import SheetsService
