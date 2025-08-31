@@ -36,7 +36,6 @@ def handle_manual_add(session, text, user_name):
             }
             return "Silahkan pilih metode input transaksi:", keyboard
         session.transaction_data["nama"] = text
-        # Otomatis ambil tanggal hari ini, format ISO
         session.transaction_data["tanggal"] = datetime.now().date().isoformat()
         session.set_state(ConversationState.ADD_MANUAL_JENIS)
         keyboard = {

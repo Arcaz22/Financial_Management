@@ -17,6 +17,7 @@ class ConversationState(Enum):
     ADD_AI_PROCESSING_WAIT = "add_ai_processing_wait"
     ADD_AI_CONFIRM = "add_ai_confirm"
     ADD_AI_EDIT = "add_ai_edit"
+    SUMMARY_INPUT = "SUMMARY_INPUT"
 
 class UserSession:
     def __init__(self):

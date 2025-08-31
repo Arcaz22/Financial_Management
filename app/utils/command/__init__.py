@@ -23,7 +23,10 @@ async def handle_command(text, user_name, chat_id, photo=None):
         return handle_help()
 
     elif text.startswith("/summary"):
-        return handle_summary()
+        return await handle_summary(text, chat_id)
+
+    elif session.state == ConversationState.SUMMARY_INPUT:
+        return await handle_summary(text, chat_id)
 
     elif text.startswith("/add"):
         session.reset()
