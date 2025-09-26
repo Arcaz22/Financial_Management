@@ -6,14 +6,14 @@ import traceback  # Tambahkan import ini
 
 logger = get_logger(__name__)
 
+
 def test_google_sheet_connection():
     scopes = [
         "https://www.googleapis.com/auth/spreadsheets",
-        "https://www.googleapis.com/auth/drive"
+        "https://www.googleapis.com/auth/drive",
     ]
     credentials = Credentials.from_service_account_file(
-        settings.credentials_path,
-        scopes=scopes
+        settings.credentials_path, scopes=scopes
     )
     gc = gspread.authorize(credentials)
     try:

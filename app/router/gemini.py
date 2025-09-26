@@ -7,6 +7,7 @@ router = APIRouter(prefix="/gemini")
 
 processor = GeminiReceiptProcessor()
 
+
 @router.post("/test")
 async def scan(file: UploadFile = File(...)):
     try:
@@ -14,10 +15,9 @@ async def scan(file: UploadFile = File(...)):
 
         result = await processor.process_receipt(contents)
 
-        return {
-            "filename": file.filename,
-            "result": result
-        }
+        return {"filename": file.filename, "result": result}
     except Exception as e:
         logger.error(f"Error processing file with Gemini: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error processing receipt: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error processing receipt: {str(e)}"
+        )

@@ -9,19 +9,18 @@ logger = logging.getLogger(__name__)
 
 telegram_service = TelegramService()
 
+
 @router.post("/webhook", response_model=WebhookResponse)
 async def telegram_webhook(update: Update, background_tasks: BackgroundTasks):
     try:
         background_tasks.add_task(telegram_service.process_update, update)
 
-        return WebhookResponse(
-            status="success",
-            message="Update processed"
-        )
+        return WebhookResponse(status="success", message="Update processed")
 
     except Exception as e:
         logger.error(f"Error in webhook endpoint: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
+
 
 @router.post("/set")
 async def set_webhook():
@@ -37,6 +36,7 @@ async def set_webhook():
     except Exception as e:
         logger.error(f"Error setting webhook: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
+
 
 @router.get("/info")
 async def get_webhook_info():

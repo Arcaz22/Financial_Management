@@ -11,6 +11,7 @@ logger = get_logger(__name__)
 ocr_service = OCRService()
 gemini_processor = GeminiReceiptProcessor()
 
+
 def _format_ocr_result(transaction_data: dict) -> str:
     def format_currency(amount_str):
         try:
@@ -27,7 +28,9 @@ def _format_ocr_result(transaction_data: dict) -> str:
     items_text = ""
     if "items" in transaction_data and transaction_data["items"]:
         items_text = "\n\n📋 Detail Item:"
-        for idx, item in enumerate(transaction_data["items"][:5], 1):  # Limit to first 5 items
+        for idx, item in enumerate(
+            transaction_data["items"][:5], 1
+        ):  # Limit to first 5 items
             name = item.get("name", "Item")
             qty = item.get("quantity", "1")
             price = format_currency(item.get("price", "0"))
@@ -46,7 +49,10 @@ def _format_ocr_result(transaction_data: dict) -> str:
             tax_text = f"\n💰 Pajak: Rp{format_currency(tax_value)}"
 
     discount_text = ""
-    if "discount" in transaction_data and transaction_data["discount"].get("value", "0") != "0":
+    if (
+        "discount" in transaction_data
+        and transaction_data["discount"].get("value", "0") != "0"
+    ):
         disc_type = transaction_data["discount"].get("type", "fixed")
         disc_value = transaction_data["discount"].get("value", "0")
         if disc_type == "percentage":
@@ -67,6 +73,7 @@ def _format_ocr_result(transaction_data: dict) -> str:
     )
 
     return message
+
 
 async def handle_scan_add(session, text=None, photo=None):
     if session.state == ConversationState.ADD_AI_PROCESSING:
@@ -90,7 +97,10 @@ async def handle_scan_add(session, text=None, photo=None):
             except Exception as e:
                 logger.error(f"Error processing receipt: {str(e)}")
                 session.set_state(ConversationState.ADD_AI_PROCESSING)
-                return "❌ Terjadi kesalahan saat memproses foto. Silakan coba lagi atau gunakan input manual.", get_back_keyboard()
+                return (
+                    "❌ Terjadi kesalahan saat memproses foto. Silakan coba lagi atau gunakan input manual.",
+                    get_back_keyboard(),
+                )
 
         return "📷 Silakan kirim foto nota/struk untuk diproses.", get_back_keyboard()
 
@@ -102,12 +112,16 @@ async def handle_scan_add(session, text=None, photo=None):
             if "jumlah" in session.transaction_data:
                 try:
                     raw_jumlah = str(session.transaction_data["jumlah"]).lstrip("'")
-                    amount_str = re.sub(r'[^\d]', '', raw_jumlah)
+                    amount_str = re.sub(r"[^\d]", "", raw_jumlah)
                     amount = int(amount_str) if amount_str else 0
                     formatted_amount = f"{amount:,}".replace(",", ".")
-                    session.transaction_data["jumlah"] = formatted_amount if amount > 0 else "0"
+                    session.transaction_data["jumlah"] = (
+                        formatted_amount if amount > 0 else "0"
+                    )
                 except (ValueError, TypeError):
-                    logger.warning(f"Failed to format amount: {session.transaction_data['jumlah']}")
+                    logger.warning(
+                        f"Failed to format amount: {session.transaction_data['jumlah']}"
+                    )
 
             # Format tanggal ke DD/MM/YYYY
             if "tanggal" in session.transaction_data:
@@ -120,6 +134,7 @@ async def handle_scan_add(session, text=None, photo=None):
 
             try:
                 from app.service.sheet import SheetsService
+
                 sheets_service = SheetsService()
                 sheets_service.add_transaction(session.transaction_data)
 

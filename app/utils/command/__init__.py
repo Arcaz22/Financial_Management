@@ -8,12 +8,16 @@ from app.service.sheet import SheetsService
 
 sheets_service = SheetsService()
 
+
 async def handle_command(text, user_name, chat_id, photo=None):
     session = get_user_session(chat_id)
 
     if text.startswith("/start"):
         session.reset()
-        return f"Hai, {user_name}! 👋 Selamat datang di bot pencatat keuanganmu. Siap bantu keuanganmu terkontrol! Ketik /menu untuk mulai ya", None
+        return (
+            f"Hai, {user_name}! 👋 Selamat datang di bot pencatat keuanganmu. Siap bantu keuanganmu terkontrol! Ketik /menu untuk mulai ya",
+            None,
+        )
 
     elif text.startswith("/menu"):
         session.reset()
@@ -34,7 +38,7 @@ async def handle_command(text, user_name, chat_id, photo=None):
         keyboard = {
             "inline_keyboard": [
                 [{"text": "✏️ Input Manual", "callback_data": "add_manual"}],
-                [{"text": "📷 Scan Nota", "callback_data": "add_scan"}]
+                [{"text": "📷 Scan Nota", "callback_data": "add_scan"}],
             ]
         }
         return "Pilih metode untuk menambahkan transaksi:", keyboard
@@ -49,7 +53,7 @@ async def handle_command(text, user_name, chat_id, photo=None):
         ConversationState.ADD_MANUAL_KATEGORI_LAINNYA,
         ConversationState.ADD_MANUAL_JUMLAH,
         ConversationState.ADD_MANUAL_DESKRIPSI,
-        ConversationState.ADD_MANUAL_CONFIRM
+        ConversationState.ADD_MANUAL_CONFIRM,
     ]:
         return handle_manual_add(session, text, user_name)
 
@@ -57,8 +61,11 @@ async def handle_command(text, user_name, chat_id, photo=None):
         ConversationState.ADD_AI_PROCESSING,
         ConversationState.ADD_AI_PROCESSING_WAIT,
         ConversationState.ADD_AI_CONFIRM,
-        ConversationState.ADD_AI_EDIT
+        ConversationState.ADD_AI_EDIT,
     ]:
         return await handle_scan_add(session, text, photo)
 
-    return "🤷‍♀️ Maaf, perintah yang kamu masukkan tidak aku kenali. Coba ketik /menu untuk melihat daftar perintah yang bisa kamu gunakan ya! 😉", None
+    return (
+        "🤷‍♀️ Maaf, perintah yang kamu masukkan tidak aku kenali. Coba ketik /menu untuk melihat daftar perintah yang bisa kamu gunakan ya! 😉",
+        None,
+    )

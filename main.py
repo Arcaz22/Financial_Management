@@ -9,14 +9,13 @@ from app.router.ocr import router as ocr
 from app.router.gemini import router as scan
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
 app = FastAPI(
     title="Bot Telegram",
     description="Bot Telegram Financial Management Api",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 app.add_middleware(
@@ -32,11 +31,13 @@ app.include_router(sheets, tags=["sheets"])
 app.include_router(ocr, tags=["ocr"])
 app.include_router(scan, tags=["ocr"])
 
+
 @app.get("/")
 async def root():
     return {
         "message": "Welcome to Financial Management API",
     }
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

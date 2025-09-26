@@ -6,6 +6,7 @@ from app.service.ocr import OCRService
 
 logger = get_logger(__name__)
 
+
 class GeminiReceiptProcessor:
     def __init__(self):
         genai.configure(api_key=settings.google_api_key)
@@ -40,7 +41,7 @@ class GeminiReceiptProcessor:
                 "items": [],
                 "tax": {"type": "none", "value": "0"},
                 "discount": {"type": "none", "value": "0"},
-                "raw_ocr_text": ""
+                "raw_ocr_text": "",
             }
 
     async def extract_data_from_ocr(self, ocr_text: str) -> dict:
@@ -88,11 +89,12 @@ class GeminiReceiptProcessor:
                 return json.loads(result_text)
             except json.JSONDecodeError:
                 import re
-                json_match = re.search(r'```json\n(.*?)\n```', result_text, re.DOTALL)
+
+                json_match = re.search(r"```json\n(.*?)\n```", result_text, re.DOTALL)
                 if json_match:
                     return json.loads(json_match.group(1))
                 else:
-                    json_str = re.search(r'(\{.*\})', result_text, re.DOTALL)
+                    json_str = re.search(r"(\{.*\})", result_text, re.DOTALL)
                     if json_str:
                         return json.loads(json_str.group(0))
                     else:
@@ -108,5 +110,5 @@ class GeminiReceiptProcessor:
                 "deskripsi": "",
                 "items": [],
                 "tax": {"type": "none", "value": "0"},
-                "discount": {"type": "none", "value": "0"}
+                "discount": {"type": "none", "value": "0"},
             }

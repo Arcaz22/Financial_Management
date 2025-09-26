@@ -2,6 +2,7 @@ from enum import Enum
 from datetime import datetime
 from typing import Dict, Optional
 
+
 class ConversationState(Enum):
     IDLE = "idle"
     ADD_METHOD_SELECTION = "add_method_selection"
@@ -19,6 +20,7 @@ class ConversationState(Enum):
     ADD_AI_EDIT = "add_ai_edit"
     SUMMARY_INPUT = "SUMMARY_INPUT"
 
+
 class UserSession:
     def __init__(self):
         self.state = ConversationState.IDLE
@@ -29,7 +31,7 @@ class UserSession:
             "sumber": "",
             "kategori": "",
             "jumlah": "",
-            "deskripsi": ""
+            "deskripsi": "",
         }
         self.prev_states = []
         self.temp_data = None
@@ -55,19 +57,31 @@ class UserSession:
             "sumber": "",
             "kategori": "",
             "jumlah": "",
-            "deskripsi": ""
+            "deskripsi": "",
         }
 
     def set_current_datetime(self):
         now = datetime.now()
         month_names = [
-            "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+            "Januari",
+            "Februari",
+            "Maret",
+            "April",
+            "Mei",
+            "Juni",
+            "Juli",
+            "Agustus",
+            "September",
+            "Oktober",
+            "November",
+            "Desember",
         ]
         formatted_date = f"{now.day} {month_names[now.month-1]} {now.year} {now.hour:02d}:{now.minute:02d}"
         self.transaction_data["tanggal"] = formatted_date
 
+
 user_sessions: Dict[int, UserSession] = {}
+
 
 def get_user_session(chat_id: int) -> UserSession:
     if chat_id not in user_sessions:

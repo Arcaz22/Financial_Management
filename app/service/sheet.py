@@ -6,6 +6,7 @@ from app.core.config import settings
 
 logger = get_logger(__name__)
 
+
 class SheetsService:
     def __init__(self):
         self._init_connection()
@@ -13,11 +14,10 @@ class SheetsService:
     def _init_connection(self):
         scopes = [
             "https://www.googleapis.com/auth/spreadsheets",
-            "https://www.googleapis.com/auth/drive"
+            "https://www.googleapis.com/auth/drive",
         ]
         credentials = Credentials.from_service_account_file(
-            settings.credentials_path,
-            scopes=scopes
+            settings.credentials_path, scopes=scopes
         )
         self.gc = gspread.authorize(credentials)
         try:
@@ -38,21 +38,23 @@ class SheetsService:
             return sheet_name
         except gspread.exceptions.WorksheetNotFound:
             worksheet = self.spreadsheet.add_worksheet(
-                title=sheet_name,
-                rows=1000,
-                cols=10
+                title=sheet_name, rows=1000, cols=10
             )
 
             headers = [
-                "Tanggal", "Nama", "Jenis", "Sumber",
-                "Kategori", "Jumlah", "Deskripsi"
+                "Tanggal",
+                "Nama",
+                "Jenis",
+                "Sumber",
+                "Kategori",
+                "Jumlah",
+                "Deskripsi",
             ]
-            worksheet.update('A1:G1', [headers])
+            worksheet.update("A1:G1", [headers])
 
-            worksheet.format('A1:G1', {
-                'textFormat': {'bold': True},
-                'horizontalAlignment': 'CENTER'
-            })
+            worksheet.format(
+                "A1:G1", {"textFormat": {"bold": True}, "horizontalAlignment": "CENTER"}
+            )
 
             logger.info(f"Created new sheet: {sheet_name}")
             return sheet_name
@@ -80,7 +82,7 @@ class SheetsService:
             transaction_data["sumber"],
             transaction_data["kategori"],
             transaction_data["jumlah"],  # integer
-            transaction_data["deskripsi"]
+            transaction_data["deskripsi"],
         ]
 
         worksheet.append_row(row_data, value_input_option="USER_ENTERED")

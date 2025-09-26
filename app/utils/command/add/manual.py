@@ -12,17 +12,25 @@ from app.utils.constant import (
     VALID_CONFIRM,
 )
 
+
 def handle_manual_add(session, text, user_name):
     if session.state == ConversationState.ADD_METHOD_SELECTION:
         if text == "add_manual":
             session.set_state(ConversationState.ADD_MANUAL_NAME)
             session.set_current_datetime()
-            keyboard = {"inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]}
+            keyboard = {
+                "inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]
+            }
             return "Silahkan masukkan nama transaksi:", keyboard
         elif text == "add_scan":
             session.set_state(ConversationState.ADD_AI_PROCESSING)
-            keyboard = {"inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]}
-            return "📷 Silahkan kirim foto nota/struk belanja untuk diproses. Pastikan gambar jelas dan seluruh nota terlihat.", keyboard
+            keyboard = {
+                "inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]
+            }
+            return (
+                "📷 Silahkan kirim foto nota/struk belanja untuk diproses. Pastikan gambar jelas dan seluruh nota terlihat.",
+                keyboard,
+            )
 
     # Nama transaksi
     if session.state == ConversationState.ADD_MANUAL_NAME:
@@ -31,7 +39,7 @@ def handle_manual_add(session, text, user_name):
             keyboard = {
                 "inline_keyboard": [
                     [{"text": "✏️ Input Manual", "callback_data": "add_manual"}],
-                    [{"text": "📷 Scan Nota", "callback_data": "add_scan"}]
+                    [{"text": "📷 Scan Nota", "callback_data": "add_scan"}],
                 ]
             }
             return "Silahkan pilih metode input transaksi:", keyboard
@@ -42,9 +50,9 @@ def handle_manual_add(session, text, user_name):
             "inline_keyboard": [
                 [
                     {"text": "💰 Pemasukan", "callback_data": "pemasukan"},
-                    {"text": "💸 Pengeluaran", "callback_data": "pengeluaran"}
+                    {"text": "💸 Pengeluaran", "callback_data": "pengeluaran"},
                 ],
-                [{"text": "« Kembali", "callback_data": "back"}]
+                [{"text": "« Kembali", "callback_data": "back"}],
             ]
         }
         return "Pilih jenis transaksi:", keyboard
@@ -53,10 +61,15 @@ def handle_manual_add(session, text, user_name):
     if session.state == ConversationState.ADD_MANUAL_JENIS:
         if text in ["back", "« Kembali"]:
             session.go_back()
-            keyboard = {"inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]}
+            keyboard = {
+                "inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]
+            }
             return "Silahkan masukkan nama transaksi:", keyboard
         if text not in VALID_JENIS:
-            return "Silahkan pilih jenis transaksi menggunakan tombol yang tersedia.", None
+            return (
+                "Silahkan pilih jenis transaksi menggunakan tombol yang tersedia.",
+                None,
+            )
         if text == "pemasukan":
             session.transaction_data["jenis"] = "Pemasukan"
         elif text == "pengeluaran":
@@ -67,9 +80,9 @@ def handle_manual_add(session, text, user_name):
                 [
                     {"text": "💵 Cash", "callback_data": "cash"},
                     {"text": "🏦 BCA", "callback_data": "bca"},
-                    {"text": "♾️ Lainnya", "callback_data": "other_source"}
+                    {"text": "♾️ Lainnya", "callback_data": "other_source"},
                 ],
-                [{"text": "« Kembali", "callback_data": "back"}]
+                [{"text": "« Kembali", "callback_data": "back"}],
             ]
         }
         return "Pilih sumber dana transaksi:", keyboard
@@ -82,9 +95,9 @@ def handle_manual_add(session, text, user_name):
                 "inline_keyboard": [
                     [
                         {"text": "💰 Pemasukan", "callback_data": "pemasukan"},
-                        {"text": "💸 Pengeluaran", "callback_data": "pengeluaran"}
+                        {"text": "💸 Pengeluaran", "callback_data": "pengeluaran"},
                     ],
-                    [{"text": "« Kembali", "callback_data": "back"}]
+                    [{"text": "« Kembali", "callback_data": "back"}],
                 ]
             }
             return "Pilih jenis transaksi:", keyboard
@@ -108,19 +121,23 @@ def handle_manual_add(session, text, user_name):
                     [
                         {"text": "💵 Cash", "callback_data": "cash"},
                         {"text": "🏦 BCA", "callback_data": "bca"},
-                        {"text": "♾️ Lainnya", "callback_data": "other_source"}
+                        {"text": "♾️ Lainnya", "callback_data": "other_source"},
                     ],
-                    [{"text": "« Kembali", "callback_data": "back"}]
+                    [{"text": "« Kembali", "callback_data": "back"}],
                 ]
             }
             return "Pilih sumber dana transaksi:", keyboard
         if text == "other_category":
             session.set_state(ConversationState.ADD_MANUAL_KATEGORI_LAINNYA)
-            keyboard = {"inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]}
+            keyboard = {
+                "inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]
+            }
             return "Silahkan ketik nama kategori lainnya:", keyboard
         session.transaction_data["kategori"] = CATEGORY_MAP.get(text, text)
         session.set_state(ConversationState.ADD_MANUAL_JUMLAH)
-        keyboard = {"inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]}
+        keyboard = {
+            "inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]
+        }
         return "Masukkan jumlah transaksi (dalam angka, contoh: 50000):", keyboard
 
     # Kategori Lainnya (input manual)
@@ -133,11 +150,18 @@ def handle_manual_add(session, text, user_name):
                 keyboard = build_keyboard(EXPENSE_CATEGORIES)
             return "Pilih kategori transaksi:", keyboard
         if not text.strip():
-            keyboard = {"inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]}
-            return "Nama kategori tidak boleh kosong. Silahkan ketik nama kategori lainnya:", keyboard
+            keyboard = {
+                "inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]
+            }
+            return (
+                "Nama kategori tidak boleh kosong. Silahkan ketik nama kategori lainnya:",
+                keyboard,
+            )
         session.transaction_data["kategori"] = text.strip()
         session.set_state(ConversationState.ADD_MANUAL_JUMLAH)
-        keyboard = {"inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]}
+        keyboard = {
+            "inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]
+        }
         return "Masukkan jumlah transaksi (dalam angka, contoh: 50000):", keyboard
 
     # Jumlah
@@ -155,14 +179,21 @@ def handle_manual_add(session, text, user_name):
         amount = int(clean_amount)
         session.transaction_data["jumlah"] = amount
         session.set_state(ConversationState.ADD_MANUAL_DESKRIPSI)
-        keyboard = {"inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]}
-        return "Masukkan deskripsi transaksi (opsional, ketik '-' jika tidak ada):", keyboard
+        keyboard = {
+            "inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]
+        }
+        return (
+            "Masukkan deskripsi transaksi (opsional, ketik '-' jika tidak ada):",
+            keyboard,
+        )
 
     # Deskripsi
     if session.state == ConversationState.ADD_MANUAL_DESKRIPSI:
         if text in ["back", "« Kembali"]:
             session.go_back()
-            keyboard = {"inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]}
+            keyboard = {
+                "inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]
+            }
             return "Masukkan jumlah transaksi (dalam angka, contoh: 50000):", keyboard
         session.transaction_data["deskripsi"] = text if text != "-" else ""
         session.set_state(ConversationState.ADD_MANUAL_CONFIRM)
@@ -173,16 +204,16 @@ def handle_manual_add(session, text, user_name):
         confirmation += f"💰 Sumber: {session.transaction_data['sumber']}\n"
         confirmation += f"🏷️ Kategori: {session.transaction_data['kategori']}\n"
         confirmation += f"💵 Jumlah: Rp {session.transaction_data['jumlah']:,}\n"
-        if session.transaction_data['deskripsi']:
+        if session.transaction_data["deskripsi"]:
             confirmation += f"📝 Deskripsi: {session.transaction_data['deskripsi']}\n"
         confirmation += "\nApakah data di atas sudah benar?"
         keyboard = {
             "inline_keyboard": [
                 [
                     {"text": "✅ Simpan", "callback_data": "save_transaction"},
-                    {"text": "❌ Batal", "callback_data": "cancel_transaction"}
+                    {"text": "❌ Batal", "callback_data": "cancel_transaction"},
                 ],
-                [{"text": "« Kembali", "callback_data": "back"}]
+                [{"text": "« Kembali", "callback_data": "back"}],
             ]
         }
         return confirmation, keyboard
@@ -191,22 +222,34 @@ def handle_manual_add(session, text, user_name):
     if session.state == ConversationState.ADD_MANUAL_CONFIRM:
         if text in ["back", "« Kembali"]:
             session.go_back()
-            keyboard = {"inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]}
-            return "Masukkan deskripsi transaksi (opsional, ketik '-' jika tidak ada):", keyboard
+            keyboard = {
+                "inline_keyboard": [[{"text": "« Kembali", "callback_data": "back"}]]
+            }
+            return (
+                "Masukkan deskripsi transaksi (opsional, ketik '-' jika tidak ada):",
+                keyboard,
+            )
         if text not in VALID_CONFIRM:
             return "Silahkan pilih aksi menggunakan tombol yang tersedia.", None
         if text == "save_transaction":
             # Simpan ke sheets
             try:
                 from app.service.sheet import SheetsService
+
                 sheets_service = SheetsService()
                 sheets_service.add_transaction(session.transaction_data)
                 session.reset()
-                return "✅ Transaksi berhasil disimpan! Gunakan /add untuk menambahkan transaksi baru atau /menu untuk kembali ke menu utama.", None
+                return (
+                    "✅ Transaksi berhasil disimpan! Gunakan /add untuk menambahkan transaksi baru atau /menu untuk kembali ke menu utama.",
+                    None,
+                )
             except Exception as e:
                 return f"❌ Terjadi kesalahan saat menyimpan transaksi: {str(e)}", None
         elif text == "cancel_transaction":
             session.reset()
-            return "❌ Transaksi dibatalkan. Gunakan /menu untuk kembali ke menu utama.", None
+            return (
+                "❌ Transaksi dibatalkan. Gunakan /menu untuk kembali ke menu utama.",
+                None,
+            )
 
     return None, None
