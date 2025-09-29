@@ -1,20 +1,16 @@
 import re
-import json
+import logging
 from datetime import datetime
-from typing import Dict, List, Any, Tuple, Optional
-
-from app.utils.logger import get_logger
 from app.utils.conversation import ConversationState, get_user_session
-from app.service.ai_summary import (
-    AISummaryGenerator,
-)
+from app.service.ai_summary import AISummaryGenerator
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
+# Use the AI summary generator instead of standard summary
 ai_summary_generator = AISummaryGenerator()
 
 
-async def handle_summary(text=None, chat_id=None) -> Tuple[str, Optional[Dict]]:
+async def handle_summary(text=None, chat_id=None):
     try:
         session = None
         if chat_id:
@@ -27,11 +23,11 @@ async def handle_summary(text=None, chat_id=None) -> Tuple[str, Optional[Dict]]:
 
         elif session and session.state == ConversationState.SUMMARY_INPUT:
             query = text.lower()
-            logger.info(f"Processing summary query: {query}")
 
             month = datetime.now().month
             year = datetime.now().year
 
+            # Extract month and year from query
             month_names = {
                 "januari": 1,
                 "februari": 2,
@@ -45,6 +41,7 @@ async def handle_summary(text=None, chat_id=None) -> Tuple[str, Optional[Dict]]:
                 "oktober": 10,
                 "november": 11,
                 "desember": 12,
+                # shortened versions
                 "jan": 1,
                 "feb": 2,
                 "mar": 3,
@@ -61,15 +58,18 @@ async def handle_summary(text=None, chat_id=None) -> Tuple[str, Optional[Dict]]:
                 "des": 12,
             }
 
+            # Extract month from query
             for name, num in month_names.items():
                 if name in query:
                     month = num
                     break
 
+            # Extract year from query
             year_match = re.search(r"\b(20[2-3][0-9])\b", query)
             if year_match:
                 year = int(year_match.group(1))
 
+            # Handle relative time references
             if "bulan ini" in query or "bulan sekarang" in query:
                 month = datetime.now().month
                 year = datetime.now().year
@@ -83,8 +83,10 @@ async def handle_summary(text=None, chat_id=None) -> Tuple[str, Optional[Dict]]:
 
             session.reset()
 
+            # Determine if this is a specific query or general summary
             specific_query = None
 
+            # Check for specific query patterns
             if any(
                 keyword in query
                 for keyword in ["top", "terbesar", "tertinggi", "pengeluaran tertinggi"]
@@ -92,6 +94,7 @@ async def handle_summary(text=None, chat_id=None) -> Tuple[str, Optional[Dict]]:
                 specific_query = query
                 logger.info(f"Specific query detected: {specific_query}")
 
+            # Get month name
             month_names_id = {
                 1: "Januari",
                 2: "Februari",
@@ -108,10 +111,7 @@ async def handle_summary(text=None, chat_id=None) -> Tuple[str, Optional[Dict]]:
             }
             month_name = month_names_id.get(month, "Unknown")
 
-            logger.info(
-                f"Getting summary for {month_name} {year}, with specific query: {specific_query}"
-            )
-
+            # Get the AI-enhanced summary with the specific query if applicable
             result = await ai_summary_generator.get_monthly_summary(
                 year, month, specific_query
             )
@@ -121,6 +121,7 @@ async def handle_summary(text=None, chat_id=None) -> Tuple[str, Optional[Dict]]:
                     "month_name", month_names_id.get(month, "Unknown")
                 )
 
+                # If this was a specific query, format the response differently
                 if specific_query:
                     response = f"{result['analysis']}"
                 else:
